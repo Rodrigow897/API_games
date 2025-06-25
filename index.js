@@ -66,7 +66,65 @@ app.delete('/consoles/:id', async (req, res) => {
 });
 
 
+//Games CRUD
+app.get('/games', async (_, res) => {
+    try {
+        const games = await pool.query('SELECT * FROM tb_games');
+        res.status(200).json(games.rows);
+    } catch (err) {
+        console.error('Erro ao buscar games', err);
+    }
+});
+
+app.post('/games', async (req, res) =>{
+    const { name, description, launch_date, id_console } = req.body;
+
+    try{
+        const games = await pool.query('INSERT INTO tb_games (name, description, launch_date, id_console) VALUES ($1, $2, $3, $4) RETURNING *',
+            [ name, description, launch_date, id_console ]
+        );
+        res.status(200).json(games.rows[0])
+    } catch (err) {
+        console.error('Erro ao buscar games:', err);
+        res.status(500).json({ error: 'Games não encontrado'})
+    }
+});
+
+app.put('/games/:id', async (req, res) =>{
+    const { id } = req.params;
+    const { name, description, launch_date, id_console } = req.body;
+
+    try{
+        const games = await pool.query('UPDATE tb_games SET name = $1, description = $2, launch_date = $3, id_console = $4 WHERE id = $5 RETURNING *',
+        [name, description, launch_date, id_console, id]
+        );   
+
+        if (games.rowsCount === 0) {
+            return res.status(404).json({ error: 'Games não encontrados'});
+        }
+        res.status(200).json(games.rows[0])
+    } catch (err) {
+        console.error('Games não encontrados:', err)
+        res.status(500).json({ error: 'Erro ao buscar games'})
+    }
+})
+
+app.delete('/games/:id', async (req, res) => {
+    const { id } =  req.params;
+    try {
+        const games = await pool.query('DELETE FROM tb_games WHERE id = $1 RETURNING *', [id]);
+        if (games.rowCount === 0) {
+            res.status(404).json({ error: 'Game(s) não encontrado(s)'})
+        }
+        res.status(200).json({ message: 'Game(s) excluido(s) com sucesso'})
+    } catch (err) {
+        console.error('Erro ao excluir game(s)');
+        res.status(500).json({ error: 'Erro ao excluir o(s) games(s)'})
+    }
+});
+
+
 const PORT = 3000
 app.listen(PORT, () => {
     console.log("servidor iniciado")
-})
+});
