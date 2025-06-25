@@ -4,57 +4,57 @@ const pool = require('./database/db');
 
 app.use(express.json());
 
-app.get('/Games', async (_, res) => {
+app.get('/consoles', async (_, res) => {
     try {
-        const games = await pool.query('SELECT * FROM tb_console');
-        res.status(200).json(games.rows);
+        const consoles = await pool.query('SELECT * FROM tb_console');
+        res.status(200).json(consoles.rows);
     } catch (err) {
         console.error('Erro ao buscar consoles', err);
     }
 });
 
 
-app.post('/Games', async (req, res) => {
+app.post('/consoles', async (req, res) => {
     const { name, launch_date } = req.body;
     try {
-        const games = await pool.query (
+        const consoles = await pool.query (
             'INSERT INTO tb_console (name, launch_date) VALUES ($1, $2) RETURNING *',
             [name, launch_date]
         );
-        res.status(200).json(games.rows[0]);
+        res.status(200).json(consoles.rows[0]);
     } catch (err) {
         console.error('Erro ao criar console', err);
         res.status(500).json({ error: 'Erro ao criar o console'})
     }
 });
 
-app.put('/Games/:id', async (req, res) => {
+app.put('/consoles/:id', async (req, res) => {
     const{id} = req.params;
     const { name, launch_date } = req.body;
 
     try {
-        const games = await pool.query(
+        const consoles = await pool.query(
             'UPDATE tb_console SET name = $1, launch_date = $2 WHERE id = $3 RETURNING *',
-            [name, launch_date]
+            [name, launch_date, id]
         );
 
-        if (games.rowCount === 0) {
+        if (consoles.rowCount === 0) {
             return res.status(404).json({ error: 'Console não encontrado'});
         } 
 
-        res.status(200).json(games.row[0]);
+        res.status(200).json(consoles.rows[0]);
     } catch (err) {
         console.error('Erro ao atualizar console:', err);
-        res.status(500).json({ error: 'Erro ao atuaizar a tarefa'});
+        res.status(500).json({ error: 'Erro ao atualizar a tarefa'});
     }
 });
 
-app.delete('/Games/:id', async (req, res) => {
+app.delete('/consoles/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const games = await pool.query('DELETE FROM tb_console WHERE id = $1 RETURNING *', [id]);
-        if (games.rowCount === 0) {
+        const consoles = await pool.query('DELETE FROM tb_console WHERE id = $1 RETURNING *', [id]);
+        if (consoles.rowCount === 0) {
             return res.status(404).json({ error: 'Console não encontrado'});
         }
 
