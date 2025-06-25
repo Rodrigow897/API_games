@@ -15,16 +15,6 @@ app.get('/Games', async (_, res) => {
 
 
 app.post('/Games', async (req, res) => {
-    try {
-        const games = await pool.query('SELECT * FROM tb_console');
-        res.status(200).json(games.rows);
-    } catch (err) {
-        console.error('Erro ao buscar consoles', err)
-    }
-});
-
-
-app.post('/Games', async (req, res) => {
     const { name, launch_date } = req.body;
     try {
         const games = await pool.query (
